@@ -1,12 +1,11 @@
-from rest_framework import viewsets, mixins
-from rest_framework.generics import get_object_or_404
-from reviews.models import Review, Title, Genre, Category
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import mixins, viewsets
+from rest_framework.generics import get_object_or_404
+from reviews.models import Category, Genre, Review, Title
 
-from .permissions import (IsAdminModeratorOwnerOrReadOnly)
-from .serializers import (CommentSerializer, ReviewSerializer,
-                          CategorySerializer, GenreSerializer, 
-                          TitleSerializer)
+from .permissions import IsAdminModeratorOwnerOrReadOnly
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer, TitleSerializer)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -36,7 +35,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         title_id = self.kwargs.get('title_id')
         review_id = self.kwargs.get('review_id')
         review = get_object_or_404(Review, id=review_id, title=title_id)
-        serializer.save(author=self.request.user, review=review
+        serializer.save(author=self.request.user, review=review)
 
 
 class CategoryViewSet(mixins.CreateModelMixin,

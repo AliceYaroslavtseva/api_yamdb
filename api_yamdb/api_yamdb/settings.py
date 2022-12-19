@@ -1,5 +1,6 @@
 from pathlib import Path
-from datetime  import timedelta
+from datetime import timedelta
+from django.conf.global_settings import DATETIME_INPUT_FORMATS
 import os
 
 
@@ -25,8 +26,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_filters',
-    'reviews',
     'rest_framework_simplejwt',
+    'import_export',
+    'reviews',
     'users',
     'api',
 ]
@@ -103,6 +105,10 @@ USE_L10N = True
 
 USE_TZ = True
 
+DATETIME_INPUT_FORMATS = [
+    '%Y-%m-%dT%H:%M:%S.%fZ',
+]
+
 
 # Static files (CSS, JavaScript, Images)
 
@@ -145,11 +151,11 @@ SIMPLE_JWT = {
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
-    'USER_AUTHENTICATION_RULE':  'rest_framework_simplejwt.аутентификация.default_user_authentication_rule',
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.аутентификация.default_user_authentication_rule',
 
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.accessToken',),
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
-    'TOKEN_USER_CLASS':  'rest_framework_simplejwt.models.TokenUser',
+    'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
 
     'JTI_CLAIM': 'jti',
 
@@ -165,3 +171,5 @@ ROLE_CHOICES = (
     ('moderator', 'moderator'),
     ('admin', 'admin'),
 )
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

@@ -1,17 +1,20 @@
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from .models import User
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
-from rest_framework import  status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework_simplejwt.tokens import AccessToken
-from .permissions import IsAdminPermission
-from .serializers import UsersViewSerializer, ConfirmationCodeSerializer, SingUpSerializer, TokenSerializer
 from rest_framework.viewsets import ModelViewSet
-from django.contrib.auth.tokens import default_token_generator
+from rest_framework_simplejwt.tokens import AccessToken
+
 from api_yamdb.settings import DEFAULT_FROM_EMAIL
+
+from .models import User
+from .permissions import IsAdminPermission
+from .serializers import (ConfirmationCodeSerializer, SingUpSerializer,
+                          TokenSerializer, UsersViewSerializer)
 
 
 def send_confirmation_code(user, confirmation_code):
