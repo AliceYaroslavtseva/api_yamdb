@@ -9,15 +9,15 @@ class SingUpSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         if value == 'me':
-            raise serializers.ValidationError('"me"- недопустимое '
-                                              'имя пользователя')
+            raise serializers.ValidationError('Недопустимое имя пользователя')
         return value
 
     def create(self, validated_data):
-        return User.objects.create(
+        user = User.objects.create(
             username=self.validated_data['username'],
             email=self.validated_data['email'],
-        )                    
+        )
+        return user                 
 
     class Meta:
         model = User
@@ -52,6 +52,16 @@ class UsersViewSerializer(serializers.ModelSerializer):
             'bio',
             'role'
         )
+
+class MeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name',
+            'last_name', 'bio', 'role',
+        )
+        read_only_fields = ('role',)
 
 
 class ReviewSerializer(serializers.ModelSerializer):

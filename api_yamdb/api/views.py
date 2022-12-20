@@ -1,9 +1,10 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, status, viewsets
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework import mixins, status, viewsets, filters
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.generics import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,14 +14,14 @@ from rest_framework_simplejwt.tokens import AccessToken
 from api_yamdb.settings import DEFAULT_FROM_EMAIL
 from reviews.models import Category, Genre, Review, Title, User
 
-from .permissions import IsAdminModeratorOwnerOrReadOnly, IsAdminPermission
+from .permissions import IsAdminModeratorOwnerOrReadOnly, IsAdmin, MePermission
 from .serializers import (CategorySerializer, CommentSerializer,
                           ConfirmationCodeSerializer, GenreSerializer,
                           ReviewSerializer, SingUpSerializer, TitleSerializer,
-                          TokenSerializer, UsersViewSerializer)
+                          TokenSerializer, UsersViewSerializer, MeSerializer)
 
 
-def send_confirmation_code(user, confirmation_code):
+def send_confirmation_code(request):
     serializer = ConfirmationCodeSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data.get('username')
@@ -67,7 +68,26 @@ def get_token(request):
 class UsersViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UsersViewSerializer
-    permission_classes = (IsAdminPermission,)
+    permission_classes = (IsAdmin,)
+    pagination_class = PageNumberPagination
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filterset_fields = ('username',)
+    search_fields = ('username',)
+    lookup_field = 'username'
+
+    @action(
+        detail=False, methods=['get', 'patch'],
+        permission_classes=[MePermission]
+    )
+    def me(self, request):
+        user = request.user
+        if request.method == 'PATCH':
+            serializer = MeSerializer(user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = MeSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
