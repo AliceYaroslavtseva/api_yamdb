@@ -12,9 +12,6 @@ class UserResourse(resources.ModelResource):
         fields = (
             'id', 'username', 'email', 'role', 'bio', 'first_name', 'last_name'
         )
-        list_display = (
-            'id', 'username', 'email', 'role', 'bio', 'first_name', 'last_name'
-        )
         export_order = (
             'id', 'username', 'email', 'role', 'bio', 'first_name', 'last_name'
         )
@@ -22,6 +19,9 @@ class UserResourse(resources.ModelResource):
 
 class UserAdmin(ImportExportModelAdmin):
     resource_class = UserResourse
+    list_display = (
+        'id', 'username', 'email', 'role', 'bio', 'first_name', 'last_name'
+    )
 
 
 class TitleResourse(resources.ModelResource):
@@ -29,12 +29,12 @@ class TitleResourse(resources.ModelResource):
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'category')
-        list_display = ('id', 'name', 'year', 'category')
         export_order = ('id', 'name', 'year', 'category')
 
 
 class TitleAdmin(ImportExportModelAdmin):
     resource_class = TitleResourse
+    list_display = ('id', 'name', 'year', 'category')
 
 
 class CategoryResourse(resources.ModelResource):
@@ -45,6 +45,7 @@ class CategoryResourse(resources.ModelResource):
 
 class CategoryAdmin(ImportExportModelAdmin):
     resource_class = CategoryResourse
+    list_display = ('name', 'slug')
 
 
 class GenreResourse(resources.ModelResource):
@@ -55,6 +56,7 @@ class GenreResourse(resources.ModelResource):
 
 class GenreAdmin(ImportExportModelAdmin):
     resource_class = GenreResourse
+    list_display = ('name', 'slug')
 
 
 class ReviewResourse(resources.ModelResource):
@@ -63,12 +65,12 @@ class ReviewResourse(resources.ModelResource):
     class Meta:
         model = Review
         fields = ('id', 'title', 'text', 'author', 'score', 'pub_date')
-        list_display = ('id', 'title', 'text', 'author', 'score', 'pub_date')
         export_order = ('id', 'title', 'text', 'author', 'score', 'pub_date')
 
 
 class ReviewAdmin(ImportExportModelAdmin):
     resource_class = ReviewResourse
+    list_display = ('id', 'title', 'text', 'author', 'score', 'pub_date')
 
 
 class CommentResourse(resources.ModelResource):
@@ -77,12 +79,12 @@ class CommentResourse(resources.ModelResource):
     class Meta:
         model = Comment
         fields = ('id', 'review', 'text', 'author', 'pub_date')
-        list_display = ('id', 'review', 'text', 'author', 'pub_date')
         export_order = ('id', 'review', 'text', 'author', 'pub_date')
 
 
 class CommentAdmin(ImportExportModelAdmin):
     resource_class = CommentResourse
+    list_display = ('id', 'review', 'text', 'author', 'pub_date')
 
 
 class GenreTitleResourse(resources.ModelResource):
