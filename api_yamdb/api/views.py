@@ -15,11 +15,14 @@ from rest_framework_simplejwt.tokens import AccessToken
 from api_yamdb.settings import DEFAULT_FROM_EMAIL
 from reviews.models import Category, Genre, Review, Title, User
 
-from .permissions import IsAdminModeratorOwnerOrReadOnly, IsAdmin, MePermission
+from .permissions import (
+    IsAdminModeratorOwnerOrReadOnly, IsAdmin, MePermission, IsAdminOrReadOnly
+)
 from .serializers import (CategorySerializer, CommentSerializer,
                           ConfirmationCodeSerializer, GenreSerializer,
                           ReviewSerializer, SingUpSerializer, TitleSerializer,
-                          TokenSerializer, UsersViewSerializer, MeSerializer)
+                          TokenSerializer, UsersViewSerializer, MeSerializer,
+                          TitleVisualSerializer)
 
 
 def send_confirmation_code(request):
@@ -128,6 +131,10 @@ class CategoryViewSet(mixins.CreateModelMixin,
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    lookup_field = 'slug'
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
 
 
 class GenreViewSet(mixins.CreateModelMixin,
@@ -137,12 +144,21 @@ class GenreViewSet(mixins.CreateModelMixin,
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    lookup_field = 'slug'
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
 
     queryset = Title.objects.all().annotate(
         Avg("reviews__score")).order_by("name")
-    serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend, )
     filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
+    permission_classes = (IsAdminOrReadOnly, )
+
+    def get_serializer_class(self):
+        if self.action == 'list' or 'retriev':
+            return TitleVisualSerializer
+        return TitleSerializer

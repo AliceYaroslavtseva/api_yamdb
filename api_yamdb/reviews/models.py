@@ -69,6 +69,9 @@ class Category(models.Model):
     name = models.CharField('Категория', max_length=256)
     slug = models.SlugField(max_length=50, unique=True)
 
+    class Meta:
+        ordering = ('name', )
+
     def __str__(self):
         return self.name
 
@@ -77,6 +80,9 @@ class Genre(models.Model):
 
     name = models.CharField('Жанр', max_length=256)
     slug = models.SlugField(max_length=50, unique=True)
+
+    class Meta:
+        ordering = ('name', )
 
     def __str__(self):
         return self.name
@@ -106,9 +112,8 @@ class Title(models.Model):
         default=None
     )
 
-    def __init__(self, data):
-        super(User, self).__init__('data')
-        self.data = data
+    class Meta:
+        ordering = ('id', )
 
     def __str__(self):
         return self.name

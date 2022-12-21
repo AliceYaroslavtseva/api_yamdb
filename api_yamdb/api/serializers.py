@@ -38,10 +38,11 @@ class SingUpSerializer(serializers.Serializer):
             email=self.validated_data['email'],
         )
         return user
-        
+
     class Meta:
         model = User
         fields= ('last_login', 'username', 'first_name', 'last_name', 'bio', 'role')
+
 
 class ConfirmationCodeSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
@@ -69,7 +70,7 @@ class UsersViewSerializer(serializers.ModelSerializer):
 
     def validate(self, data,):
         user_if = User.objects.filter(username=data['username']).exists()
-        email_if  = User.objects.filter(email=data['email']).exists()
+        email_if = User.objects.filter(email=data['email']).exists()
         if (user_if or email_if):
             raise serializers.ValidationError('Почта уже использовалась')
         return data
@@ -132,17 +133,19 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = 'name', 'slug'
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = '__all__'
+        fields = 'name', 'slug'
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор для not SAFE.METHODS."""
+    """Поле жанр и категория ввводится как slug."""
     genre = serializers.SlugRelatedField(
         many=True, queryset=Genre.objects.all(), slug_field='slug'
     )
@@ -152,6 +155,17 @@ class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(
         source='reviews__score__avg', read_only=True
     )
+
+    class Meta:
+        model = Title
+        fields = '__all__'
+
+
+class TitleVisualSerializer(serializers.ModelSerializer):
+    """Сериализатор для SAFE.METHODS."""
+    """Поле жанр и категории выводится как словарь"""
+    genre = GenreSerializer(read_only=True, many=True)
+    category = CategorySerializer(read_only=True)
 
     class Meta:
         model = Title

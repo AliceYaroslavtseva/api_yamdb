@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'import_export',
     'rest_framework',
     'django_filters',
+    'import_export',
     'reviews',
     'rest_framework_simplejwt',
     'api',
@@ -104,6 +105,9 @@ USE_L10N = True
 
 USE_TZ = True
 
+DATETIME_INPUT_FORMATS = [
+    '%Y-%m-%dT%H:%M:%S.%fZ',
+]
 
 # Static files (CSS, JavaScript, Images)
 

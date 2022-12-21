@@ -7,16 +7,21 @@ api_yamdb
 ля
 ля
 ля
-ля
-ля
-яляля
-ля
-ял
-яля
-ля
-ля
-ял
-яля
-лял
-ял
-ял
+## Импорт базы данных.
+### Установка приложения
+```
+pip install django-import-export
+```
+### Добавляем приложении в settings
+```
+# settings.py
+INSTALLED_APPS = (
+    ...
+    'import_export',
+)
+```
+### Применяем collectstatic
+```
+$ python manage.py collectstatic
+```
+### Импорт данных из cvs в БД осуществляется в админ-панеле.
