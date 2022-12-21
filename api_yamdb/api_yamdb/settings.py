@@ -2,6 +2,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from django.conf.global_settings import DATETIME_INPUT_FORMATS
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -22,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'import_export',
     'rest_framework',
     'django_filters',
     'reviews',
@@ -167,3 +170,8 @@ ROLE_CHOICES = (
     ('moderator', 'moderator'),
     ('admin', 'admin'),
 )
+DATETIME_INPUT_FORMATS = [
+    '%Y-%m-%dT%H:%M:%S.%fZ',
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

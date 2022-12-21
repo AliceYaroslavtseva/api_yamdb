@@ -38,7 +38,7 @@ class SingUpSerializer(serializers.Serializer):
             email=self.validated_data['email'],
         )
         return user
-    
+        
     class Meta:
         model = User
         fields= ('last_login', 'username', 'first_name', 'last_name', 'bio', 'role')
@@ -85,6 +85,7 @@ class UsersViewSerializer(serializers.ModelSerializer):
             'role'
         )
 
+
 class MeSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -124,6 +125,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
+        fields = '__all__'
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -146,6 +148,9 @@ class TitleSerializer(serializers.ModelSerializer):
     )
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(), slug_field='slug'
+    )
+    rating = serializers.IntegerField(
+        source='reviews__score__avg', read_only=True
     )
 
     class Meta:
