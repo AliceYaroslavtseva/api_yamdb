@@ -160,8 +160,8 @@ class TitleSerializer(serializers.ModelSerializer):
 class TitleVisualSerializer(serializers.ModelSerializer):
     """Сериализатор для SAFE.METHODS."""
     """Поле жанр и категории выводится как словарь"""
-    genre = GenreSerializer(read_only=True, many=True)
-    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer()
 
     class Meta:
         model = Title

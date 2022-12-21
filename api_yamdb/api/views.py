@@ -150,13 +150,12 @@ class GenreViewSet(mixins.CreateModelMixin,
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend, )
     filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
     permission_classes = (IsAdminOrReadOnly, )
 
     def get_serializer_class(self):
-        if self.action == 'list' or 'retriev':
+        if self.action in ('list', 'retriev'):
             return TitleVisualSerializer
         return TitleSerializer
