@@ -1,16 +1,36 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
+import re
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
-class SingUpSerializer(serializers.ModelSerializer):
+class SingUpSerializer(serializers.Serializer):
+
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField(max_length=254)
 
     def validate_username(self, value):
+        if not re.fullmatch(r'^[\w.@+-]+', value):
+            raise serializers.ValidationError('Nickname должен содержать буквы,'
+                                               'цифры и символы @.+-_')
         if value == 'me':
-            raise serializers.ValidationError('Недопустимое имя пользователя')
+            raise serializers.ValidationError('Недопустимое имя "me"')
         return value
+    
+    def validate(self, data):
+        user_if = User.objects.filter(username=data['username']).exists()
+        email_if  = User.objects.filter(email=data['email']).exists()
+        if data['username'] == 'me':
+            raise serializers.ValidationError('Недопустимое имя "me"')
+        if User.objects.filter(username=data['username'], email=data['email']).exists():
+            return data
+        if (user_if or email_if):
+            raise serializers.ValidationError('Почта уже использовалась')
+        if email_if:
+            raise serializers.ValidationError('Почта уже использовалась')
+        return data
 
     def create(self, validated_data):
         user = User.objects.create(
@@ -18,11 +38,10 @@ class SingUpSerializer(serializers.ModelSerializer):
             email=self.validated_data['email'],
         )
         return user
-
+        
     class Meta:
         model = User
-        fields = ('username', 'email')
-
+        fields= ('last_login', 'username', 'first_name', 'last_name', 'bio', 'role')
 
 class ConfirmationCodeSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
@@ -33,14 +52,27 @@ class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
-
+ 
 class UsersViewSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=150)
-    email = serializers.EmailField(max_length=254)
+    email = serializers.EmailField(required=True, max_length=254)
     first_name = serializers.CharField(required=False, max_length=150)
     last_name = serializers.CharField(required=False, max_length=150)
     bio = serializers.CharField(required=False)
     role = serializers.CharField(required=False, default='user')
+
+    def validate_username(self, value):
+        if not re.fullmatch(r'^[\w.@+-]+', value):
+            raise serializers.ValidationError('Nickname должен содержать буквы,'
+                                               'цифры и символы @.+-_')
+        return value
+
+    def validate(self, data,):
+        user_if = User.objects.filter(username=data['username']).exists()
+        email_if  = User.objects.filter(email=data['email']).exists()
+        if (user_if or email_if):
+            raise serializers.ValidationError('Почта уже использовалась')
+        return data
 
     class Meta:
         model = User

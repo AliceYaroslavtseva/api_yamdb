@@ -29,9 +29,8 @@ class User(AbstractUser):
         help_text='Пароль',
     )
     email = models.EmailField(
-        'e-mail',
+        'email',
         max_length=254,
-        unique=True,
         help_text='Электронная почта',
     )
     first_name = models.CharField(
@@ -106,6 +105,10 @@ class Title(models.Model):
         null=True,
         default=None
     )
+
+    def __init__(self, data):
+        super(User, self).__init__('data')
+        self.data = data
 
     def __str__(self):
         return self.name
