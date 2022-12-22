@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
-import re
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
@@ -18,7 +17,7 @@ class SingUpSerializer(serializers.Serializer):
         if value == 'me':
             raise serializers.ValidationError('Недопустимое имя "me"')
         return value
-    
+
     def validate(self, data):
         user_if = User.objects.filter(username=data['username']).exists()
         email_if  = User.objects.filter(email=data['email']).exists()
@@ -36,7 +35,7 @@ class SingUpSerializer(serializers.Serializer):
         user = User.objects.create(
             username=self.validated_data['username'],
             email=self.validated_data['email'],
-        )
+        )                    
         return user
     
     class Meta:
@@ -53,7 +52,7 @@ class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
- 
+
 class UsersViewSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField(required=True, max_length=254)

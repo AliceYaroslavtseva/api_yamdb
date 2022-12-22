@@ -1,5 +1,6 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status, viewsets, filters
 from rest_framework.decorators import api_view, permission_classes, action
@@ -14,6 +15,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from api_yamdb.settings import DEFAULT_FROM_EMAIL
 from reviews.models import Category, Genre, Review, Title, User
 
+from .filters import TitleFilter
 from .permissions import (
     IsAdminModeratorOwnerOrReadOnly, IsAdmin, MePermission, IsAdminOrReadOnly
 )
@@ -150,12 +152,14 @@ class GenreViewSet(mixins.CreateModelMixin,
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
-    filter_backends = (DjangoFilterBackend, )
-    filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
+
+    queryset = Title.objects.all().annotate(Avg("reviews__score")).order_by("name")
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
     permission_classes = (IsAdminOrReadOnly, )
 
     def get_serializer_class(self):
-        if self.action in ('list', 'retriev'):
+        print(self.action)
+        if self.action in ('list', 'retrieve'):
             return TitleVisualSerializer
         return TitleSerializer
