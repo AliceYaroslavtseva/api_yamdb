@@ -1,7 +1,8 @@
+import re
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
-import re
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
@@ -18,10 +19,10 @@ class SingUpSerializer(serializers.Serializer):
         if value == 'me':
             raise serializers.ValidationError('Недопустимое имя "me"')
         return value
-    
+
     def validate(self, data):
         user_if = User.objects.filter(username=data['username']).exists()
-        email_if  = User.objects.filter(email=data['email']).exists()
+        email_if = User.objects.filter(email=data['email']).exists()
         if data['username'] == 'me':
             raise serializers.ValidationError('Недопустимое имя "me"')
         if User.objects.filter(username=data['username'], email=data['email']).exists():
@@ -41,7 +42,7 @@ class SingUpSerializer(serializers.Serializer):
 
     class Meta:
         model = User
-        fields= ('last_login', 'username', 'first_name', 'last_name', 'bio', 'role')
+        fields = ('last_login', 'username', 'first_name', 'last_name', 'bio', 'role')
 
 
 class ConfirmationCodeSerializer(serializers.Serializer):
@@ -53,7 +54,7 @@ class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
- 
+
 class UsersViewSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField(required=True, max_length=254)
@@ -152,9 +153,6 @@ class TitleSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(), slug_field='slug'
     )
-    rating = serializers.IntegerField(
-        source='reviews__score__avg', read_only=True
-    )
 
     class Meta:
         model = Title
@@ -164,8 +162,11 @@ class TitleSerializer(serializers.ModelSerializer):
 class TitleVisualSerializer(serializers.ModelSerializer):
     """Сериализатор для SAFE.METHODS."""
     """Поле жанр и категории выводится как словарь"""
-    genre = GenreSerializer(read_only=True, many=True)
-    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer()
+    rating = serializers.IntegerField(
+        source='reviews__score__avg', read_only=True
+    )
 
     class Meta:
         model = Title
