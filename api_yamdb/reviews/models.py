@@ -13,14 +13,12 @@ class User(AbstractUser):
         'Логин',
         max_length=150,
         unique=True,
-        help_text='Nickname',
-        validators=[
-            RegexValidator(
-                regex=r'^[\w.@+-]+',
-                message=('Nickname должен содержать буквы,'
-                         'цифры и символы @.+-_')
-            )
-        ]
+        help_text='Nickname'
+    )
+    confirmation_code = models.CharField(
+        'Код подтверждения',
+        max_length=100,
+        blank=True
     )
     password = models.CharField(
         'Пароль',
@@ -32,6 +30,7 @@ class User(AbstractUser):
         'email',
         max_length=254,
         help_text='Электронная почта',
+        unique=True,
     )
     first_name = models.CharField(
         'Имя',
@@ -100,10 +99,6 @@ class Title(models.Model):
         blank=False, null=True,
         on_delete=models.SET_NULL
     )
-
-    def __init__(self, data):
-        super(User, self).__init__('data')
-        self.data = data
 
     def __str__(self):
         return self.name
