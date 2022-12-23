@@ -1,9 +1,8 @@
 import re
 
-from rest_framework import serializers
 from django.core.exceptions import ValidationError
+from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
