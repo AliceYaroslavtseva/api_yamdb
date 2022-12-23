@@ -23,6 +23,7 @@ class Test04TitleAPI:
     def test_02_title_admin(self, admin_client, client):
         genres = create_genre(admin_client)
         categories = create_categories(admin_client)
+        print('CATEGORIES', categories)
         url = '/api/v1/titles/'
         title_count = 0
 
@@ -53,6 +54,7 @@ class Test04TitleAPI:
             'description': 'Рон Свонсон рекомендует.'
         }
         response = admin_client.post(url, data=post_data_1)
+        print('RESPONSE TO TITLES', response)
         assert response.status_code == HTTPStatus.CREATED, (
             f'Если POST-запрос администратора к `{url}` '
             'содержит корректные данные - должен вернуться ответ со статусом '
@@ -86,6 +88,7 @@ class Test04TitleAPI:
             f'`{url}` возвращает ответ со статусом 200.'
         )
         data = response.json()
+        print('DATADATA', data)
         check_pagination(url, data, title_count)
 
         expected_title_names = {post_data_1['name'], post_data_2['name']}
@@ -97,6 +100,7 @@ class Test04TitleAPI:
         )
 
         for element in data['results']:
+            print('THIS IS DATA', data['results'])
             if element['name'] == post_data_1['name']:
                 title = element
 

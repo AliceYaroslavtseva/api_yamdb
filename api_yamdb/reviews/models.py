@@ -68,6 +68,9 @@ class Category(models.Model):
     name = models.CharField('Категория', max_length=256)
     slug = models.SlugField(max_length=50, unique=True)
 
+    class Meta:
+        ordering = ('name', )
+
     def __str__(self):
         return self.name
 
@@ -76,6 +79,9 @@ class Genre(models.Model):
 
     name = models.CharField('Жанр', max_length=256)
     slug = models.SlugField(max_length=50, unique=True)
+
+    class Meta:
+        ordering = ('name', )
 
     def __str__(self):
         return self.name
@@ -99,6 +105,14 @@ class Title(models.Model):
         blank=False, null=True,
         on_delete=models.SET_NULL
     )
+    rating = models.IntegerField(
+        verbose_name='Рейтинг',
+        null=True,
+        default=None
+    )
+
+    class Meta:
+        ordering = ('id', )
 
     def __str__(self):
         return self.name
@@ -118,7 +132,8 @@ class Review(models.Model):
         Title,
         verbose_name='Произведение',
         on_delete=models.CASCADE,
-        related_name='reviews'
+        related_name='reviews',
+        null=True
     )
     text = models.TextField(
         verbose_name='Отзыв',
@@ -130,7 +145,7 @@ class Review(models.Model):
         related_name='reviews'
     )
     score = models.IntegerField(
-        verbose_name='Рейтинг',
+        verbose_name='Оценка',
         validators=[
             MinValueValidator(1),
             MaxValueValidator(10)
@@ -144,6 +159,12 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['pub_date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique'
+            ),
+        ]
 
 
 class Comment(models.Model):
@@ -151,7 +172,8 @@ class Comment(models.Model):
         Review,
         verbose_name='Отзыв',
         on_delete=models.CASCADE,
-        related_name='comments'
+        related_name='comments',
+        null=True
     )
     text = models.TextField(
         verbose_name='Коментарий',

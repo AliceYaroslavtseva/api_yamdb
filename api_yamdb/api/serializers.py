@@ -1,7 +1,8 @@
+import re
+
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
-import re
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
@@ -22,7 +23,7 @@ class SingUpSerializer(serializers.ModelSerializer):
         if value == 'me':
             raise serializers.ValidationError('Недопустимое имя "me"')
         return value
-    
+
     def validate(self, data):
         user_if = User.objects.filter(username=data['username']).exists()
         email_if  = User.objects.filter(email=data['email']).exists()
@@ -41,7 +42,7 @@ class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
- 
+
 class UsersViewSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
@@ -60,6 +61,7 @@ class UsersViewSerializer(serializers.ModelSerializer):
             'bio',
             'role'
         )
+
 
 class MeSerializer(serializers.ModelSerializer):
     role = serializers.StringRelatedField(read_only=True)
@@ -105,28 +107,45 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
+        fields = '__all__'
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = 'name', 'slug'
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = '__all__'
+        fields = 'name', 'slug'
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор для not SAFE.METHODS."""
+    """Поле жанр и категория ввводится как slug."""
     genre = serializers.SlugRelatedField(
         many=True, queryset=Genre.objects.all(), slug_field='slug'
     )
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(), slug_field='slug'
+    )
+
+    class Meta:
+        model = Title
+        fields = '__all__'
+
+
+class TitleVisualSerializer(serializers.ModelSerializer):
+    """Сериализатор для SAFE.METHODS."""
+    """Поле жанр и категории выводится как словарь"""
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer()
+    rating = serializers.IntegerField(
+        source='reviews__score__avg', read_only=True
     )
 
     class Meta:

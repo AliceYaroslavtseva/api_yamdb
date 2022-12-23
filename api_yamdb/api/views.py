@@ -17,6 +17,14 @@ from .permissions import IsAdminModeratorOwnerOrReadOnly, IsAdmin, MePermission
 from .serializers import (CategorySerializer, CommentSerializer, GenreSerializer,
                           ReviewSerializer, SingUpSerializer, TitleSerializer,
                           TokenSerializer, UsersViewSerializer, MeSerializer)
+from .filters import TitleFilter
+from .permissions import (IsAdmin, IsAdminModeratorOwnerOrReadOnly,
+                          IsAdminOrReadOnly, MePermission)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          ConfirmationCodeSerializer, GenreSerializer,
+                          MeSerializer, ReviewSerializer, SingUpSerializer,
+                          TitleSerializer, TitleVisualSerializer,
+                          TokenSerializer, UsersViewSerializer)
 
 
 class SignUp(APIView):
@@ -131,6 +139,10 @@ class CategoryViewSet(mixins.CreateModelMixin,
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    lookup_field = 'slug'
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
 
 
 class GenreViewSet(mixins.CreateModelMixin,
@@ -140,11 +152,21 @@ class GenreViewSet(mixins.CreateModelMixin,
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    lookup_field = 'slug'
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
 
-    queryset = Title.objects.all()
-    serializer_class = TitleSerializer
-    filter_backends = (DjangoFilterBackend, )
-    filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
+    queryset = Title.objects.all().annotate(
+        Avg("reviews__score")).order_by("name")
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return TitleVisualSerializer
+        return TitleSerializer
