@@ -54,6 +54,7 @@ class SignUp(APIView):
         )
         email.send()
 
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def get_token(request):
@@ -95,6 +96,7 @@ class UsersViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
