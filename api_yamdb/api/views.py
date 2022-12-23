@@ -22,6 +22,15 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           UsersViewSerializer)
 
 
+class CreateListDestoyViewSet(mixins.CreateModelMixin,
+                              mixins.ListModelMixin,
+                              mixins.DestroyModelMixin,
+                              viewsets.GenericViewSet):
+    """Собственный ViewSet GetList, Post, Delete"""
+
+    pass
+
+
 class SignUp(APIView):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
@@ -129,10 +138,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review=review)
 
 
-class CategoryViewSet(mixins.CreateModelMixin,
-                      mixins.ListModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
+class CategoryViewSet(CreateListDestoyViewSet):
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -142,10 +148,7 @@ class CategoryViewSet(mixins.CreateModelMixin,
     search_fields = ('name',)
 
 
-class GenreViewSet(mixins.CreateModelMixin,
-                   mixins.ListModelMixin,
-                   mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet):
+class GenreViewSet(CreateListDestoyViewSet):
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
