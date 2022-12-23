@@ -1,16 +1,20 @@
 import re
 
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
-class SingUpSerializer(serializers.Serializer):
+class SingUpSerializer(serializers.ModelSerializer):
 
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField(max_length=254)
+
+    class Meta:
+        model = User
+        fields= ('username', 'email')
 
     def validate_username(self, value):
         if not re.fullmatch(r'^[\w.@+-]+', value):
@@ -22,32 +26,16 @@ class SingUpSerializer(serializers.Serializer):
 
     def validate(self, data):
         user_if = User.objects.filter(username=data['username']).exists()
-        email_if = User.objects.filter(email=data['email']).exists()
-        if data['username'] == 'me':
-            raise serializers.ValidationError('Недопустимое имя "me"')
+        email_if  = User.objects.filter(email=data['email']).exists()
+        if user_if:
+            if not email_if:
+                raise serializers.ValidationError('Имя уже использовалась')
+        if email_if:
+            if not user_if:
+                raise serializers.ValidationError('Почта уже использовалось')
         if User.objects.filter(username=data['username'], email=data['email']).exists():
             return data
-        if (user_if or email_if):
-            raise serializers.ValidationError('Почта уже использовалась')
-        if email_if:
-            raise serializers.ValidationError('Почта уже использовалась')
         return data
-
-    def create(self, validated_data):
-        user = User.objects.create(
-            username=self.validated_data['username'],
-            email=self.validated_data['email'],
-        )
-        return user
-
-    class Meta:
-        model = User
-        fields = ('last_login', 'username', 'first_name', 'last_name', 'bio', 'role')
-
-
-class ConfirmationCodeSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    email = serializers.EmailField(required=True)
 
 
 class TokenSerializer(serializers.Serializer):
@@ -56,25 +44,12 @@ class TokenSerializer(serializers.Serializer):
 
 
 class UsersViewSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(max_length=150)
-    email = serializers.EmailField(required=True, max_length=254)
-    first_name = serializers.CharField(required=False, max_length=150)
-    last_name = serializers.CharField(required=False, max_length=150)
-    bio = serializers.CharField(required=False)
-    role = serializers.CharField(required=False, default='user')
 
     def validate_username(self, value):
         if not re.fullmatch(r'^[\w.@+-]+', value):
             raise serializers.ValidationError('Nickname должен содержать буквы,'
                                                'цифры и символы @.+-_')
         return value
-
-    def validate(self, data,):
-        user_if = User.objects.filter(username=data['username']).exists()
-        email_if = User.objects.filter(email=data['email']).exists()
-        if (user_if or email_if):
-            raise serializers.ValidationError('Почта уже использовалась')
-        return data
 
     class Meta:
         model = User
@@ -89,13 +64,18 @@ class UsersViewSerializer(serializers.ModelSerializer):
 
 
 class MeSerializer(serializers.ModelSerializer):
+    role = serializers.StringRelatedField(read_only=True)
+
+    def validate_username(self, value):
+        if not re.fullmatch(r'^[\w.@+-]+', value):
+            raise serializers.ValidationError('Nickname должен содержать буквы,'
+                                               'цифры и символы @.+-_')
+        return value
 
     class Meta:
         model = User
-        fields = (
-            'username', 'email', 'first_name',
-            'last_name', 'bio', 'role',
-        )
+        fields = ('username', 'email', 'bio', 'role',
+                  'first_name', 'last_name')
         read_only_fields = ('role',)
 
 

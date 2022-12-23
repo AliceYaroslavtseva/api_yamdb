@@ -1,20 +1,22 @@
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
-from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, status, viewsets
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework import mixins, status, viewsets, filters
+from rest_framework.decorators import api_view, permission_classes, action
+from django.core.mail import EmailMessage
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated 
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
-
 from api_yamdb.settings import DEFAULT_FROM_EMAIL
 from reviews.models import Category, Genre, Review, Title, User
 
+from .permissions import IsAdminModeratorOwnerOrReadOnly, IsAdmin, MePermission
+from .serializers import (CategorySerializer, CommentSerializer, GenreSerializer,
+                          ReviewSerializer, SingUpSerializer, TitleSerializer,
+                          TokenSerializer, UsersViewSerializer, MeSerializer)
 from .filters import TitleFilter
 from .permissions import (IsAdmin, IsAdminModeratorOwnerOrReadOnly,
                           IsAdminOrReadOnly, MePermission)
@@ -25,34 +27,37 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           TokenSerializer, UsersViewSerializer)
 
 
-def send_confirmation_code(request):
-    serializer = ConfirmationCodeSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    username = serializer.validated_data.get('username')
-    email = serializer.validated_data.get('email')
-    user = get_object_or_404(User, username=username)
-    confirmation_code = default_token_generator.make_token(user)
-    return send_mail(
-        'Код подтверждения',
-        f'Ваш код подтверждения: {confirmation_code}',
-        [DEFAULT_FROM_EMAIL],
-        [email],
-        fail_silently=False
-    )
-
-
 class SignUp(APIView):
     queryset = User.objects.all()
-    serializer_class = SingUpSerializer
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = SingUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        send_confirmation_code(request)
+        user, created = User.objects.get_or_create(
+            username=serializer.validated_data['username'],
+            email=serializer.validated_data['email'],
+        )
+        confirmation_code = default_token_generator.make_token(user)
+        email_text = (
+            f'text {confirmation_code}'
+        )
+        data = {
+            'email_info': email_text,
+            'to_email': user.email,
+            'mail_subject': 'Код подтверждения'
+        }
+        self.send_email(data)
         return Response(request.data, status=status.HTTP_200_OK)
 
+    @staticmethod
+    def send_email(data):
+        email = EmailMessage(
+            subject=data['mail_subject'],
+            body=data['email_info'],
+            to=[data['to_email']]
+        )
+        email.send()
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -69,29 +74,32 @@ def get_token(request):
                     status=status.HTTP_400_BAD_REQUEST)
 
 
-class UsersViewSet(ModelViewSet):
+class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UsersViewSerializer
-    permission_classes = (IsAdmin,)
+    permission_classes = (IsAuthenticated, IsAdmin)
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_fields = ('username',)
     search_fields = ('username',)
     lookup_field = 'username'
+    http_method_names = ['get', 'post', 'delete', 'patch']
 
     @action(
         detail=False, methods=['get', 'patch'],
-        permission_classes=[MePermission]
+        url_path='me',
+        permission_classes=[IsAuthenticated]
     )
     def me(self, request):
         user = request.user
+        if request.method == "GET":
+            serializer = self.get_serializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         if request.method == 'PATCH':
             serializer = MeSerializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        serializer = MeSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
