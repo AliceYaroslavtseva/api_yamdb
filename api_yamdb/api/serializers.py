@@ -1,9 +1,8 @@
 import re
 
-from rest_framework import serializers
 from django.core.exceptions import ValidationError
+from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
@@ -14,26 +13,28 @@ class SingUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields= ('username', 'email')
+        fields = ('username', 'email')
 
     def validate_username(self, value):
         if not re.fullmatch(r'^[\w.@+-]+', value):
-            raise serializers.ValidationError('Nickname должен содержать буквы,'
-                                               'цифры и символы @.+-_')
+            raise serializers.ValidationError('Nickname должен'
+                                              ' содержать буквы,'
+                                              'цифры и символы @.+-_')
         if value == 'me':
             raise serializers.ValidationError('Недопустимое имя "me"')
         return value
 
     def validate(self, data):
         user_if = User.objects.filter(username=data['username']).exists()
-        email_if  = User.objects.filter(email=data['email']).exists()
+        email_if = User.objects.filter(email=data['email']).exists()
         if user_if:
             if not email_if:
                 raise serializers.ValidationError('Имя уже использовалась')
         if email_if:
             if not user_if:
                 raise serializers.ValidationError('Почта уже использовалось')
-        if User.objects.filter(username=data['username'], email=data['email']).exists():
+        if User.objects.filter(username=data['username'],
+                               email=data['email']).exists():
             return data
         return data
 
@@ -47,8 +48,9 @@ class UsersViewSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         if not re.fullmatch(r'^[\w.@+-]+', value):
-            raise serializers.ValidationError('Nickname должен содержать буквы,'
-                                               'цифры и символы @.+-_')
+            raise serializers.ValidationError('Nickname должен'
+                                              ' содержать буквы,'
+                                              'цифры и символы @.+-_')
         return value
 
     class Meta:
@@ -68,8 +70,9 @@ class MeSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         if not re.fullmatch(r'^[\w.@+-]+', value):
-            raise serializers.ValidationError('Nickname должен содержать буквы,'
-                                               'цифры и символы @.+-_')
+            raise serializers.ValidationError('Nickname должен'
+                                              ' содержать буквы,'
+                                              'цифры и символы @.+-_')
         return value
 
     class Meta:
