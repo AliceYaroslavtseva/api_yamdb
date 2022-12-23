@@ -1,6 +1,5 @@
 from http import HTTPStatus
 
-
 check_name_and_slug_patterns = (
     (
         {
@@ -192,6 +191,7 @@ def create_categories(admin_client):
         'slug': 'books'
     }
     admin_client.post('/api/v1/categories/', data=data2)
+    print([data1, data2])
     return [data1, data2]
 
 
