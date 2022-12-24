@@ -12,7 +12,8 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from .models import User
 from .permissions import IsAdmin
-from .serializers import MeSerializer, SingUpSerializer, UsersViewSerializer, TokenSerializer
+from .serializers import (MeSerializer, SingUpSerializer, TokenSerializer,
+                          UsersViewSerializer)
 
 
 class SignUp(APIView):

@@ -5,11 +5,19 @@ from rest_framework.generics import get_object_or_404
 from reviews.models import Category, Genre, Review, Title
 
 from .filters import TitleFilter
-from .permissions import (IsAdminModeratorOwnerOrReadOnly,
-                          IsAdminOrReadOnly)
+from .permissions import IsAdminModeratorOwnerOrReadOnly, IsAdminOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, TitleSerializer,
                           TitleVisualSerializer)
+
+
+class CreateListDestoyViewSet(mixins.CreateModelMixin,
+                              mixins.ListModelMixin,
+                              mixins.DestroyModelMixin,
+                              viewsets.GenericViewSet):
+    """Собственный ViewSet GetList, Post, Delete"""
+
+    pass
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -42,10 +50,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review=review)
 
 
-class CategoryViewSet(mixins.CreateModelMixin,
-                      mixins.ListModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
+class CategoryViewSet(CreateListDestoyViewSet):
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -55,10 +60,7 @@ class CategoryViewSet(mixins.CreateModelMixin,
     search_fields = ('name',)
 
 
-class GenreViewSet(mixins.CreateModelMixin,
-                   mixins.ListModelMixin,
-                   mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet):
+class GenreViewSet(CreateListDestoyViewSet):
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer

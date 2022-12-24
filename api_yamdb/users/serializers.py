@@ -1,6 +1,7 @@
 import re
 
 from rest_framework import serializers
+
 from .models import User
 
 
@@ -29,9 +30,9 @@ class SingUpSerializer(serializers.ModelSerializer):
         user_if = User.objects.filter(username=data['username']).exists()
         email_if = User.objects.filter(email=data['email']).exists()
         if user_if and not email_if:
-                raise serializers.ValidationError('Имя уже использовалась')
+            raise serializers.ValidationError('Имя уже использовалась')
         if email_if and not user_if:
-                raise serializers.ValidationError('Почта уже использовалось')
+            raise serializers.ValidationError('Почта уже использовалось')
         if User.objects.filter(username=data['username'],
                                email=data['email']).exists():
             return data
