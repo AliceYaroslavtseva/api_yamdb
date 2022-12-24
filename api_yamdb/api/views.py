@@ -5,8 +5,7 @@ from rest_framework.generics import get_object_or_404
 from reviews.models import Category, Genre, Review, Title
 
 from .filters import TitleFilter
-from .permissions import (IsAdminModeratorOwnerOrReadOnly,
-                          IsAdminOrReadOnly)
+from .permissions import IsAdminModeratorOwnerOrReadOnly, IsAdminOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, TitleSerializer,
                           TitleVisualSerializer)
