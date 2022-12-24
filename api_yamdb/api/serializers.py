@@ -7,7 +7,10 @@ from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class SingUpSerializer(serializers.ModelSerializer):
-
+    """
+    Тут тесты требуют проверку на.
+    максимальную длинну username и email.
+    """
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField(max_length=254)
 
@@ -16,10 +19,10 @@ class SingUpSerializer(serializers.ModelSerializer):
         fields = ('username', 'email')
 
     def validate_username(self, value):
-        if not re.fullmatch(r'^[\w.@+-]+', value):
+        if not re.fullmatch(r'^[\w.+-]+', value):
             raise serializers.ValidationError('Nickname должен'
                                               ' содержать буквы,'
-                                              'цифры и символы @.+-_')
+                                              'цифры и символы .+-_')
         if value == 'me':
             raise serializers.ValidationError('Недопустимое имя "me"')
         return value
@@ -27,11 +30,9 @@ class SingUpSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user_if = User.objects.filter(username=data['username']).exists()
         email_if = User.objects.filter(email=data['email']).exists()
-        if user_if:
-            if not email_if:
+        if user_if and not email_if:
                 raise serializers.ValidationError('Имя уже использовалась')
-        if email_if:
-            if not user_if:
+        if email_if and not user_if:
                 raise serializers.ValidationError('Почта уже использовалось')
         if User.objects.filter(username=data['username'],
                                email=data['email']).exists():
@@ -47,10 +48,10 @@ class TokenSerializer(serializers.Serializer):
 class UsersViewSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
-        if not re.fullmatch(r'^[\w.@+-]+', value):
+        if not re.fullmatch(r'^[\w.+-]+', value):
             raise serializers.ValidationError('Nickname должен'
                                               ' содержать буквы,'
-                                              'цифры и символы @.+-_')
+                                              'цифры и символы .+-_')
         return value
 
     class Meta:
