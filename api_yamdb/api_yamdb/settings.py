@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'reviews',
     'rest_framework_simplejwt',
     'api',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -166,7 +167,7 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=7),
 }
 
-AUTH_USER_MODEL = 'reviews.User'
+AUTH_USER_MODEL = 'users.User'
 
 ROLE_CHOICES = (
     ('user', 'user'),
