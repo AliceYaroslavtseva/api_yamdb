@@ -200,4 +200,5 @@ DATETIME_INPUT_FORMATS = [
     '%Y-%m-%dT%H:%M:%S.%fZ',
 ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# FIX: повторяется, убрать надо.
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

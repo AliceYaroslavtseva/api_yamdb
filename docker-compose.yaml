@@ -1,5 +1,6 @@
 # версия docker-compose
-version: '4.17.0'
+#FIX версия кривая. version: '4.17.0'
+version: '3.3'
 
 # имена и описания контейнеров, которые должны быть развёрнуты
 services:
@@ -7,12 +8,15 @@ services:
   db:
     # образ, из которого должен быть запущен контейнер
     image: postgres:13.0-alpine
+    ports:
+      - 5432:5432
     # volume и связанная с ним директория в контейнере
     volumes:
       - /var/lib/postgresql/data/
     # адрес файла, где хранятся переменные окружения
     env_file:
       - ./.env
+
   web:
     build: .
     restart: always
