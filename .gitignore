@@ -145,11 +145,4 @@ dmypy.json
 
 .mypy_cache
 
-# папки со статикой и медиа
-media/
-
-**/migrations/
-
-**/**/migrations
-
 .sent_emails
