@@ -34,7 +34,7 @@ source venv/bin/activate # Для Linux и macOS
 ```
 ### Установить зависимости из файла requirements.txt:
 ```
-python -m pip install --upgrade pip # Для Windows
+python.exe -m pip install --upgrade pip # Для Windows
 python3 -m pip install --upgrade pip # Для Linux и macOS
 ```
 ```
